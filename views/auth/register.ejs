@@ -1,0 +1,49 @@
+<%- include('../partials/header') %>
+
+<div class="min-h-[80vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-slate-50">
+  <div class="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-md border border-slate-200">
+    <div class="text-center">
+      <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Create Account</h2>
+      <p class="mt-1 text-sm text-slate-600">Register to explore campus coverage reports.</p>
+    </div>
+
+    <%- include('../partials/alerts') %>
+
+    <form class="mt-6 space-y-4" action="/auth/register" method="POST">
+      <div>
+        <label for="username" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Username</label>
+        <input id="username" name="username" type="text" required class="appearance-none rounded-lg relative block w-full px-3 py-2 border border-slate-300 placeholder-slate-400 text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm">
+      </div>
+
+      <div>
+        <label for="email" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Institutional Email</label>
+        <input id="email" name="email" type="email" required class="appearance-none rounded-lg relative block w-full px-3 py-2 border border-slate-300 placeholder-slate-400 text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm" placeholder="user@ujuba.edu.ss">
+      </div>
+
+      <div>
+        <label for="password" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Password</label>
+        <input id="password" name="password" type="password" required class="appearance-none rounded-lg relative block w-full px-3 py-2 border border-slate-300 placeholder-slate-400 text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm">
+      </div>
+
+      <div>
+        <label for="confirm_password" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Confirm Password</label>
+        <input id="confirm_password" name="confirm_password" type="password" required class="appearance-none rounded-lg relative block w-full px-3 py-2 border border-slate-300 placeholder-slate-400 text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm">
+      </div>
+
+      <!-- <div class="rounded-lg bg-slate-50 border border-slate-200 p-3 text-xs text-slate-600">
+        <p class="font-semibold text-slate-700">Default Role: <span class="inline-block px-2 py-0.5 bg-slate-100 text-slate-700 text-[10px] font-bold rounded-full align-middle">Viewer</span></p>
+        <p class="mt-1">New accounts are created as Viewers (read-only access). An Administrator can change your role at any time.</p>
+      </div> -->
+
+      <button type="submit" class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition shadow-sm">
+        Complete Registration
+      </button>
+
+      <div class="text-center pt-2">
+        <p class="text-xs text-slate-500">Already registered? <a href="/auth/login" class="font-semibold text-emerald-600 hover:text-emerald-500">Sign in here</a></p>
+      </div>
+    </form>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>
