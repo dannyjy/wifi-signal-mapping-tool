@@ -1,0 +1,329 @@
+<%- include('../partials/header') %>
+
+<% const canEdit = user && (user.role === 'Admin' || user.role === 'Surveyor'); %>
+
+<!-- Full-height workspace layout -->
+<div class="flex flex-col" style="min-height: calc(100vh - 64px);">
+
+  <!-- Compact Header Bar -->
+  <div class="bg-white border-b border-slate-200 px-4 py-3 sticky top-16 z-30 shadow-sm">
+    <div class="max-w-full flex flex-wrap items-center justify-between gap-2">
+      <div class="min-w-0 flex-1">
+        <div class="flex flex-wrap items-center gap-1.5">
+          <span class="px-2 py-0.5 bg-slate-900 text-emerald-400 font-mono text-[10px] font-bold rounded uppercase flex-shrink-0"><%= session.building_code %></span>
+          <h1 class="text-sm sm:text-base font-bold text-slate-900 truncate"><%= session.session_name %></h1>
+          <span class="flex-shrink-0 px-2 py-0.5 text-[10px] font-bold rounded-full <%= session.status === 'Completed' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800' %>">
+            <%= session.status %>
+          </span>
+        </div>
+        <p class="text-[11px] text-slate-500 mt-0.5 hidden sm:block">Floor <%= session.floor_number %> — <%= session.building_name %></p>
+      </div>
+      <div class="flex gap-2 flex-shrink-0">
+        <a href="/surveys/<%= session.session_id %>/report" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs rounded-lg transition min-h-[36px] flex items-center">
+          Report
+        </a>
+        <% if (canEdit) { %>
+          <form action="/surveys/<%= session.session_id %>/complete" method="POST">
+            <button type="submit" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-lg shadow-sm transition min-h-[36px]">
+              Complete
+            </button>
+          </form>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <!-- <%- include('../partials/alerts') %> -->
+
+  <div class="flex-1 flex flex-col lg:flex-row gap-0 lg:gap-4 p-3 sm:p-4 lg:p-6 bg-slate-50">
+
+    <!-- =====================================================
+         TOOL PANEL — horizontal scroll strip on mobile,
+         vertical sidebar on lg+
+    ====================================================== -->
+    <div class="lg:w-64 xl:w-72 flex-shrink-0">
+
+      <!-- Mobile: Horizontal scrolling tool strip -->
+      <div class="lg:hidden overflow-x-auto pb-1 mb-3">
+        <div class="flex gap-2 min-w-max">
+          <% if (canEdit) { %>
+          <!-- Mode buttons -->
+          <button id="btnModePoint" onclick="switchMode('add_point')" class="flex-shrink-0 flex items-center gap-1.5 px-3 py-2.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white shadow-sm min-h-[40px] whitespace-nowrap">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            Add RSSI Point
+          </button>
+          <button id="btnModeAP" onclick="switchMode('add_ap')" class="flex-shrink-0 flex items-center gap-1.5 px-3 py-2.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 min-h-[40px] whitespace-nowrap">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-6z"></path></svg>
+            Add AP
+          </button>
+          <button id="btnModeDelete" onclick="switchMode('select_delete')" class="flex-shrink-0 flex items-center gap-1.5 px-3 py-2.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 min-h-[40px] whitespace-nowrap">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+            Delete
+          </button>
+
+          <!-- Band select inline -->
+          <div class="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg border border-slate-300 min-h-[40px]">
+            <span class="text-[10px] font-semibold text-slate-600 uppercase whitespace-nowrap">Band:</span>
+            <select id="bandSelect" class="text-xs font-semibold text-slate-800 bg-transparent focus:outline-none cursor-pointer">
+              <option value="2.4GHz" selected>2.4 GHz</option>
+              <option value="5GHz">5 GHz</option>
+              <option value="6GHz">6 GHz</option>
+            </select>
+          </div>
+          <% } %>
+
+          <!-- Heatmap toggle inline -->
+          <div class="flex-shrink-0 flex items-center gap-2 px-3 py-1.5 bg-white rounded-lg border border-slate-300 min-h-[40px]">
+            <span class="text-[10px] font-semibold text-slate-600 uppercase whitespace-nowrap">Heatmap:</span>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="chkToggleHeatmap" checked class="sr-only peer" onchange="workspace.toggleHeatmap(this.checked)">
+              <div class="w-8 h-4 bg-slate-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-emerald-600"></div>
+            </label>
+          </div>
+
+          <!-- PDF export -->
+          <a href="/surveys/<%= session.session_id %>/report/pdf" target="_blank" class="flex-shrink-0 flex items-center gap-1.5 px-3 py-2.5 bg-slate-900 text-white text-xs font-semibold rounded-lg min-h-[40px] whitespace-nowrap">
+            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            Export PDF
+          </a>
+        </div>
+      </div>
+
+      <!-- Mobile: RSSI slider row -->
+      <% if (canEdit) { %>
+      <div class="lg:hidden bg-white p-3 rounded-xl border border-slate-200 shadow-sm mb-3">
+        <div class="flex items-center gap-3">
+          <span class="text-xs font-semibold text-slate-700 whitespace-nowrap">Signal:</span>
+          <input type="range" id="rssiInput" min="-90" max="-30" value="-55" step="1"
+            class="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-600"
+            oninput="document.getElementById('rssiDisplayVal').innerText = this.value + ' dBm'">
+          <span id="rssiDisplayVal" class="text-xs font-mono font-bold text-emerald-600 whitespace-nowrap">-55 dBm</span>
+        </div>
+        <!-- Opacity row -->
+        <div class="flex items-center gap-3 mt-2">
+          <span class="text-xs font-semibold text-slate-700 whitespace-nowrap">Opacity:</span>
+          <input type="range" id="opacityInput" min="0.1" max="1.0" value="0.65" step="0.05"
+            class="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-600"
+            oninput="document.getElementById('opacityDisplayVal').innerText = Math.round(this.value * 100) + '%'; workspace.setOpacity(parseFloat(this.value));">
+          <span id="opacityDisplayVal" class="text-xs font-mono font-bold text-slate-600 whitespace-nowrap">65%</span>
+        </div>
+      </div>
+      <% } %>
+
+      <!-- Mobile: Metrics strip -->
+      <div class="lg:hidden grid grid-cols-3 gap-2 mb-3">
+        <div class="bg-white p-2.5 rounded-lg border border-slate-200 text-center">
+          <span class="block text-[10px] text-slate-500 font-medium">Points</span>
+          <span id="metricPointCount" class="block text-base font-extrabold text-slate-900 mt-0.5"><%= metrics.totalPoints %></span>
+        </div>
+        <div class="bg-white p-2.5 rounded-lg border border-slate-200 text-center">
+          <span class="block text-[10px] text-slate-500 font-medium">Avg RSSI</span>
+          <span id="metricAvgRSSI" class="block text-base font-extrabold text-slate-900 mt-0.5 text-xs font-mono"><%= metrics.avgRSSI ? metrics.avgRSSI + 'dBm' : 'N/A' %></span>
+        </div>
+        <div class="bg-white p-2.5 rounded-lg border border-slate-200 text-center">
+          <span class="block text-[10px] text-slate-500 font-medium">Dead Zones</span>
+          <span id="metricDeadZones" class="block text-base font-extrabold text-red-600 mt-0.5"><%= metrics.breakdown.poor %></span>
+        </div>
+      </div>
+
+      <!-- Desktop: Full sidebar panel -->
+      <div class="hidden lg:block bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-6">
+        <% if (canEdit) { %>
+        <div>
+          <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Tool Panel</h3>
+          <div class="space-y-2">
+            <button id="btnModePointD" class="w-full py-2.5 px-3 rounded-lg text-xs font-semibold flex items-center justify-between bg-emerald-600 text-white shadow-sm transition" onclick="switchMode('add_point')">
+              <span class="flex items-center">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                Add RSSI Measurement
+              </span>
+              <span class="w-2 h-2 rounded-full bg-emerald-300"></span>
+            </button>
+            <button id="btnModeAPD" class="w-full py-2.5 px-3 rounded-lg text-xs font-semibold flex items-center justify-between bg-slate-100 text-slate-700 hover:bg-slate-200 transition" onclick="switchMode('add_ap')">
+              <span class="flex items-center">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-6z"></path></svg>
+                Annotate Access Point
+              </span>
+            </button>
+            <button id="btnModeDeleteD" class="w-full py-2.5 px-3 rounded-lg text-xs font-semibold flex items-center justify-between bg-slate-100 text-slate-700 hover:bg-slate-200 transition" onclick="switchMode('select_delete')">
+              <span class="flex items-center">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                Select / Delete Marker
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-slate-100 space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Frequency Band</label>
+            <select id="bandSelectD" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-semibold focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <option value="2.4GHz" selected>2.4 GHz</option>
+              <option value="5GHz">5 GHz</option>
+              <option value="6GHz">6 GHz</option>
+            </select>
+          </div>
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <label class="text-xs font-semibold text-slate-700 uppercase tracking-wider">RSSI Signal Strength</label>
+              <span id="rssiDisplayValD" class="text-xs font-mono font-bold text-emerald-600">-55 dBm</span>
+            </div>
+            <input type="range" id="rssiInputD" min="-90" max="-30" value="-55" step="1" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-600" oninput="document.getElementById('rssiDisplayValD').innerText = this.value + ' dBm'">
+            <div class="flex justify-between text-[10px] text-slate-400 mt-1"><span>-90 Poor</span><span>-30 Excellent</span></div>
+          </div>
+        </div>
+        <% } %>
+
+        <div class="pt-4 border-t border-slate-100 space-y-4">
+          <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Heatmap IDW ($p=2.0$)</h3>
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold text-slate-700">Show Heatmap Layer</span>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="chkToggleHeatmapD" checked class="sr-only peer" onchange="workspace.toggleHeatmap(this.checked)">
+              <div class="w-9 h-5 bg-slate-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+            </label>
+          </div>
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <span class="text-xs font-semibold text-slate-700">Opacity</span>
+              <span id="opacityDisplayValD" class="text-xs font-mono font-bold text-slate-600">65%</span>
+            </div>
+            <input type="range" id="opacityInputD" min="0.1" max="1.0" value="0.65" step="0.05" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-600" oninput="document.getElementById('opacityDisplayValD').innerText = Math.round(this.value * 100) + '%'; workspace.setOpacity(parseFloat(this.value));">
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-slate-100 bg-slate-50 p-3 rounded-lg space-y-2 text-xs">
+          <div class="flex justify-between">
+            <span class="text-slate-500">Points Logged:</span>
+            <span id="metricPointCount" class="font-bold text-slate-900"><%= metrics.totalPoints %></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-500">Average Signal:</span>
+            <span id="metricAvgRSSI" class="font-mono font-bold text-slate-900"><%= metrics.avgRSSI ? metrics.avgRSSI + ' dBm' : 'N/A' %></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-500">Dead Zones:</span>
+            <span id="metricDeadZones" class="font-bold text-red-600"><%= metrics.breakdown.poor %></span>
+          </div>
+        </div>
+
+        <a href="/surveys/<%= session.session_id %>/report/pdf" target="_blank" class="w-full py-2.5 px-3 bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs rounded-lg transition flex items-center justify-center shadow-sm">
+          <svg class="w-4 h-4 mr-2 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          Export PDF Report
+        </a>
+      </div>
+    </div>
+
+    <!-- =====================================================
+         CANVAS WORKSPACE
+    ====================================================== -->
+    <div class="flex-1 min-w-0 space-y-3">
+      <!-- Canvas with horizontal scroll on mobile -->
+      <div class="canvas-scroll-container relative">
+        <div id="canvasContainer" class="canvas-wrapper" style="display: inline-block; min-width: 100%;">
+          <canvas id="bgCanvas" class="canvas-layer"></canvas>
+          <canvas id="heatmapCanvas" class="canvas-layer"></canvas>
+          <canvas id="markerCanvas" class="canvas-layer cursor-crosshair"></canvas>
+          <div id="canvasTooltip" class="canvas-tooltip"></div>
+        </div>
+      </div>
+
+      <!-- Legend Bar -->
+      <div class="bg-white p-3 sm:p-4 rounded-xl border border-slate-200 shadow-sm space-y-2">
+        <div class="flex items-center justify-between text-xs font-semibold text-slate-700">
+          <span>Signal Strength Legend (dBm)</span>
+          <span class="text-[10px] text-slate-400 hidden sm:block">
+            <%= canEdit ? 'Click floor map to log RSSI measurement' : 'View only mode' %>
+          </span>
+        </div>
+        <div class="heatmap-legend-bar"></div>
+        <div class="flex justify-between text-[10px] sm:text-[11px] font-bold">
+          <span class="text-emerald-600">≥ -50 Excellent</span>
+          <span class="text-blue-600 hidden sm:block">-50 to -60 Good</span>
+          <span class="text-amber-600 hidden sm:block">-60 to -70 Fair</span>
+          <span class="text-red-600">&lt; -70 Dead Zone</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/idwEngine.js"></script>
+<script src="/js/canvasEngine.js"></script>
+<script>
+  let workspace;
+
+  // Unified getters that work for both mobile & desktop controls
+  function getRSSI() {
+    const mobileSlider = document.getElementById('rssiInput');
+    const desktopSlider = document.getElementById('rssiInputD');
+    if (mobileSlider && window.innerWidth < 1024) return parseFloat(mobileSlider.value);
+    if (desktopSlider) return parseFloat(desktopSlider.value);
+    return -55;
+  }
+
+  function getBand() {
+    const mobileSelect = document.getElementById('bandSelect');
+    const desktopSelect = document.getElementById('bandSelectD');
+    if (mobileSelect && window.innerWidth < 1024) return mobileSelect.value;
+    if (desktopSelect) return desktopSelect.value;
+    return '2.4GHz';
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    workspace = new CanvasWorkspace({
+      containerId: 'canvasContainer',
+      bgCanvasId: 'bgCanvas',
+      heatmapCanvasId: 'heatmapCanvas',
+      markerCanvasId: 'markerCanvas',
+      tooltipId: 'canvasTooltip',
+      sessionId: <%= session.session_id %>,
+      floorId: <%= session.floor_id %>,
+      imageUrl: '<%= session.image_path %>',
+      initialPoints: <%- JSON.stringify(session.points || []) %>,
+      initialAPs: <%- JSON.stringify(session.aps || []) %>,
+      viewOnly: <%= canEdit ? 'false' : 'true' %>,
+      getRSSI,
+      getBand
+    });
+  });
+
+  const modeButtons = {
+    mobile: {
+      add_point: 'btnModePoint',
+      add_ap: 'btnModeAP',
+      select_delete: 'btnModeDelete'
+    },
+    desktop: {
+      add_point: 'btnModePointD',
+      add_ap: 'btnModeAPD',
+      select_delete: 'btnModeDeleteD'
+    }
+  };
+
+  function switchMode(mode) {
+    workspace.setMode(mode);
+
+    // Reset all
+    ['btnModePoint','btnModeAP','btnModeDelete','btnModePointD','btnModeAPD','btnModeDeleteD'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.classList.remove('bg-emerald-600','bg-slate-900','bg-red-600','text-white','shadow-sm');
+        el.classList.add('bg-slate-100','text-slate-700');
+      }
+    });
+
+    const color = mode === 'add_point' ? 'bg-emerald-600' : mode === 'add_ap' ? 'bg-slate-900' : 'bg-red-600';
+    const mobile = modeButtons.mobile[mode];
+    const desktop = modeButtons.desktop[mode];
+
+    [mobile, desktop].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.remove('bg-slate-100','text-slate-700');
+      el.classList.add(color,'text-white','shadow-sm');
+    });
+  }
+</script>
+
+<%- include('../partials/footer') %>
