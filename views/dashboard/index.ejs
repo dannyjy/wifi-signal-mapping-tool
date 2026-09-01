@@ -1,0 +1,180 @@
+<%- include('../partials/header') %>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+  <%- include('../partials/alerts') %>
+
+  <!-- Page Header -->
+  <div class="flex flex-col gap-4 mb-6 pb-4 border-b border-slate-200 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Executive Network Overview</h1>
+      <p class="text-xs sm:text-sm text-slate-600 mt-1">University of Juba — Campus Wireless Network Diagnostics</p>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <% if (user && (user.role === 'Admin' || user.role === 'Surveyor')) { %>
+        <a href="/surveys/new" class="inline-flex items-center justify-center px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm rounded-lg shadow-sm transition min-h-[44px]">
+          <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+          New Survey Session
+        </a>
+      <% } %>
+      <a href="/buildings" class="inline-flex items-center justify-center px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-semibold text-sm rounded-lg shadow-sm transition min-h-[44px]">
+        Campus Buildings
+      </a>
+    </div>
+  </div>
+
+  <!-- KPI Cards — 2-col on mobile, 4-col on large -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 mb-6 sm:mb-8">
+    <div class="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+      <div>
+        <span class="block text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Buildings</span>
+        <span class="block text-2xl font-extrabold text-slate-900 mt-1"><%= buildingCount %></span>
+        <span class="block text-[10px] sm:text-xs text-slate-500 mt-1"><%= floorCount %> Floors</span>
+      </div>
+      <div class="p-2 sm:p-3 bg-slate-100 rounded-lg text-slate-700">
+        <svg class="w-5 h-5 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+      </div>
+    </div>
+
+    <div class="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+      <div>
+        <span class="block text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Surveys</span>
+        <span class="block text-2xl font-extrabold text-slate-900 mt-1"><%= sessionCount %></span>
+        <span class="block text-[10px] sm:text-xs text-emerald-600 font-medium mt-1"><%= activeSessionCount %> Active</span>
+      </div>
+      <div class="p-2 sm:p-3 bg-emerald-50 rounded-lg text-emerald-600">
+        <svg class="w-5 h-5 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
+      </div>
+    </div>
+
+    <div class="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+      <div>
+        <span class="block text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Measurements</span>
+        <span class="block text-2xl font-extrabold text-slate-900 mt-1"><%= totalPointCount %></span>
+        <span class="block text-[10px] sm:text-xs text-slate-500 mt-1">RSSI Points</span>
+      </div>
+      <div class="p-2 sm:p-3 bg-blue-50 rounded-lg text-blue-600">
+        <svg class="w-5 h-5 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg>
+      </div>
+    </div>
+
+    <div class="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+      <div>
+        <span class="block text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Dead Zones</span>
+        <span class="block text-2xl font-extrabold text-red-600 mt-1"><%= deadZoneCount %></span>
+        <span class="block text-[10px] sm:text-xs text-red-500 font-medium mt-1">&lt; -70 dBm</span>
+      </div>
+      <div class="p-2 sm:p-3 bg-red-50 rounded-lg text-red-600">
+        <svg class="w-5 h-5 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Analytics Grid — stacked on mobile, 3-col on lg -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-8 mb-6 sm:mb-8">
+    <!-- Donut Chart -->
+    <div class="bg-white p-5 sm:p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+      <div>
+        <h3 class="text-sm sm:text-base font-bold text-slate-900">Signal Quality Breakdown</h3>
+        <p class="text-xs text-slate-500 mt-1">Global coverage threshold distribution</p>
+      </div>
+      <div class="relative h-56 sm:h-64 mt-4">
+        <canvas id="signalDistributionChart"></canvas>
+      </div>
+      <div class="mt-4 grid grid-cols-2 gap-2 text-xs text-center border-t border-slate-100 pt-3">
+        <div class="p-1.5 rounded bg-emerald-50 text-emerald-800 font-semibold">Excellent ≥ -50</div>
+        <div class="p-1.5 rounded bg-blue-50 text-blue-800 font-semibold">Good -50 to -60</div>
+        <div class="p-1.5 rounded bg-amber-50 text-amber-800 font-semibold">Fair -60 to -70</div>
+        <div class="p-1.5 rounded bg-red-50 text-red-800 font-semibold">Poor &lt; -70</div>
+      </div>
+    </div>
+
+    <!-- Recent Sessions Table -->
+    <div class="lg:col-span-2 bg-white p-5 sm:p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-sm sm:text-base font-bold text-slate-900">Recent Survey Audits</h3>
+        <a href="/surveys" class="text-xs font-semibold text-emerald-600 hover:text-emerald-700 flex-shrink-0 ml-2">View All &rarr;</a>
+      </div>
+
+      <!-- Mobile card view -->
+      <div class="space-y-3 sm:hidden">
+        <% if (recentSessions && recentSessions.length > 0) { %>
+          <% recentSessions.slice(0, 3).forEach(session => { %>
+            <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+              <div class="flex items-start justify-between gap-2">
+                <div class="min-w-0">
+                  <p class="font-semibold text-slate-900 text-sm truncate"><%= session.session_name %></p>
+                  <p class="text-xs text-slate-500 mt-0.5"><%= session.building_code %> — Floor <%= session.floor_number %></p>
+                </div>
+                <span class="flex-shrink-0 px-2 py-0.5 text-[10px] font-bold rounded-full <%= session.status === 'Completed' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800' %>">
+                  <%= session.status %>
+                </span>
+              </div>
+              <div class="mt-2 flex items-center justify-between text-xs">
+                <span class="text-slate-600"><%= session.point_count %> pts &bull; <span class="font-mono font-medium <%= session.avg_rssi && parseFloat(session.avg_rssi) >= -65 ? 'text-emerald-600' : 'text-red-600' %>"><%= session.avg_rssi ? session.avg_rssi + ' dBm' : 'N/A' %></span></span>
+                <a href="/surveys/<%= session.session_id %>/workspace" class="px-3 py-1.5 bg-slate-900 text-white text-xs font-semibold rounded-md min-h-[36px] flex items-center">Open</a>
+              </div>
+            </div>
+          <% }); %>
+        <% } else { %>
+          <p class="text-sm text-slate-500 text-center py-4">No sessions yet.</p>
+        <% } %>
+      </div>
+
+      <!-- Desktop table view -->
+      <div class="hidden sm:block overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-slate-200 bg-slate-50 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+              <th class="py-2.5 px-3">Session Name</th>
+              <th class="py-2.5 px-3">Building</th>
+              <th class="py-2.5 px-3">Points</th>
+              <th class="py-2.5 px-3">Avg RSSI</th>
+              <th class="py-2.5 px-3">Status</th>
+              <th class="py-2.5 px-3 text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 text-sm">
+            <% if (recentSessions && recentSessions.length > 0) { %>
+              <% recentSessions.forEach(session => { %>
+                <tr class="hover:bg-slate-50 transition">
+                  <td class="py-3 px-3 font-semibold text-slate-900 max-w-[180px] truncate"><%= session.session_name %></td>
+                  <td class="py-3 px-3 text-slate-600"><%= session.building_code %> F<%= session.floor_number %></td>
+                  <td class="py-3 px-3 text-slate-700"><%= session.point_count %></td>
+                  <td class="py-3 px-3 font-mono font-medium <%= session.avg_rssi && parseFloat(session.avg_rssi) >= -65 ? 'text-emerald-600' : 'text-red-600' %>">
+                    <%= session.avg_rssi ? session.avg_rssi + ' dBm' : 'N/A' %>
+                  </td>
+                  <td class="py-3 px-3">
+                    <span class="px-2 py-0.5 text-xs font-semibold rounded-full <%= session.status === 'Completed' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800' %>">
+                      <%= session.status %>
+                    </span>
+                  </td>
+                  <td class="py-3 px-3 text-right">
+                    <a href="/surveys/<%= session.session_id %>/workspace" class="text-xs font-semibold px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded transition">Open</a>
+                  </td>
+                </tr>
+              <% }); %>
+            <% } else { %>
+              <tr>
+                <td colspan="6" class="py-6 text-center text-slate-500 text-sm">No survey sessions yet.</td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/dashboardCharts.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    initDashboardCharts({
+      excellent: <%= globalQuality.excellent || 0 %>,
+      good: <%= globalQuality.good || 0 %>,
+      acceptable: <%= globalQuality.acceptable || 0 %>,
+      poor: <%= globalQuality.poor || 0 %>
+    });
+  });
+</script>
+
+<%- include('../partials/footer') %>

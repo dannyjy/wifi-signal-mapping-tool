@@ -1,0 +1,17 @@
+<% if (typeof success_msg !== 'undefined' && success_msg && success_msg.length > 0) { %>
+  <div class="mb-4 p-4 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center justify-between shadow-sm">
+    <div class="flex items-center space-x-2">
+      <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+      <span class="text-sm font-medium"><%= success_msg %></span>
+    </div>
+  </div>
+<% } %>
+
+<% if (typeof error_msg !== 'undefined' && error_msg && error_msg.length > 0) { %>
+  <div class="mb-4 p-4 rounded-md bg-red-50 border border-red-200 text-red-800 flex items-center justify-between shadow-sm">
+    <div class="flex items-center space-x-2">
+      <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      <span class="text-sm font-medium"><%= error_msg %></span>
+    </div>
+  </div>
+<% } %>

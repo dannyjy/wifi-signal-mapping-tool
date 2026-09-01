@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= typeof title !== 'undefined' ? title : 'Wi-Fi Signal Mapping Tool' %></title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            emerald: {
+              50: '#ecfdf5',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857'
+            },
+            slate: {
+              900: '#0f172a'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="/css/style.css">
+  <!-- Chart.js for analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="h-full flex flex-col bg-slate-50 text-slate-800 antialiased">
+  <header class="bg-slate-900 border-b border-slate-800 text-white sticky top-0 z-40 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <!-- Brand Logo & Name -->
+        <div class="flex items-center space-x-3">
+          <a href="/dashboard" class="flex items-center space-x-3 group">
+            <div class="w-10 h-10 rounded-lg bg-emerald-600 flex items-center justify-center text-white font-bold shadow-md group-hover:bg-emerald-500 transition-colors">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.14 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"></path>
+              </svg>
+            </div>
+            <div>
+              <span class="font-bold text-lg text-white tracking-tight">Wi-Fi Signal Mapping Tool</span>
+              <span class="block text-xs text-slate-400 font-medium">University of Juba - ICT Engineering</span>
+            </div>
+          </a>
+        </div>
+
+        <!-- Navigation Links (Desktop) -->
+        <% if (typeof user !== 'undefined' && user) { %>
+          <nav class="hidden md:flex items-center space-x-1">
+            <a href="/dashboard" class="px-3 py-2 rounded-md text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition">Dashboard</a>
+            <a href="/buildings" class="px-3 py-2 rounded-md text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition">Campus Buildings</a>
+            <a href="/surveys" class="px-3 py-2 rounded-md text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition">Survey Sessions</a>
+            <% if (user && user.role === 'Admin') { %>
+              <a href="/admin/users" class="px-3 py-2 rounded-md text-sm font-medium text-emerald-300 hover:text-white hover:bg-slate-800 transition">User Management</a>
+            <% } %>
+          </nav>
+
+          <!-- User Menu (Desktop) & Mobile Toggle Button -->
+          <div class="flex items-center space-x-3">
+            <div class="hidden sm:flex items-center space-x-2">
+              <div class="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-semibold text-emerald-400 uppercase">
+                <%= user.username.charAt(0) %>
+              </div>
+              <div class="text-left">
+                <span class="block text-xs font-semibold text-white"><%= user.username %></span>
+                <span class="block text-[10px] text-emerald-400 font-medium uppercase tracking-wider"><%= user.role %></span>
+              </div>
+            </div>
+            <a href="/auth/logout" class="hidden sm:inline-block px-3 py-1.5 text-xs font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 hover:text-white rounded border border-slate-700 transition">Logout</a>
+            
+            <!-- Mobile Menu Button -->
+            <button id="mobileMenuBtn" type="button" class="md:hidden p-2 rounded-md text-slate-300 hover:text-white hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500" aria-label="Toggle Navigation">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path id="menuIconOpen" class="block" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                <path id="menuIconClose" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        <% } else { %>
+          <div class="flex items-center space-x-3">
+            <a href="/auth/login" class="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition">Login</a>
+          </div>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Mobile Dropdown Navigation Menu -->
+    <% if (typeof user !== 'undefined' && user) { %>
+      <div id="mobileMenu" class="hidden md:hidden border-t border-slate-800 bg-slate-900 px-4 pt-2 pb-4 space-y-2">
+        <a href="/dashboard" class="block px-3 py-2 rounded-md text-base font-medium text-slate-200 hover:text-white hover:bg-slate-800 transition">Dashboard</a>
+        <a href="/buildings" class="block px-3 py-2 rounded-md text-base font-medium text-slate-200 hover:text-white hover:bg-slate-800 transition">Campus Buildings</a>
+        <a href="/surveys" class="block px-3 py-2 rounded-md text-base font-medium text-slate-200 hover:text-white hover:bg-slate-800 transition">Survey Sessions</a>
+        <% if (user && user.role === 'Admin') { %>
+          <a href="/admin/users" class="block px-3 py-2 rounded-md text-base font-medium text-emerald-300 hover:text-white hover:bg-slate-800 transition">User Management</a>
+        <% } %>
+        
+        <div class="pt-3 border-t border-slate-800 flex items-center justify-between">
+          <div class="flex items-center space-x-2">
+            <div class="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-semibold text-emerald-400 uppercase">
+              <%= user.username.charAt(0) %>
+            </div>
+            <div>
+              <span class="block text-xs font-semibold text-white"><%= user.username %></span>
+              <span class="block text-[10px] text-emerald-400 font-medium uppercase"><%= user.role %></span>
+            </div>
+          </div>
+          <a href="/auth/logout" class="px-3 py-1.5 text-xs font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 hover:text-white rounded border border-slate-700 transition">Logout</a>
+        </div>
+      </div>
+    <% } %>
+  </header>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const mobileBtn = document.getElementById('mobileMenuBtn');
+      const mobileMenu = document.getElementById('mobileMenu');
+      const iconOpen = document.getElementById('menuIconOpen');
+      const iconClose = document.getElementById('menuIconClose');
+
+      if (mobileBtn && mobileMenu) {
+        mobileBtn.addEventListener('click', () => {
+          const isExpanded = mobileMenu.classList.contains('hidden');
+          if (isExpanded) {
+            mobileMenu.classList.remove('hidden');
+            if (iconOpen) iconOpen.classList.add('hidden');
+            if (iconClose) iconClose.classList.remove('hidden');
+          } else {
+            mobileMenu.classList.add('hidden');
+            if (iconOpen) iconOpen.classList.remove('hidden');
+            if (iconClose) iconClose.classList.add('hidden');
+          }
+        });
+      }
+    });
+  </script>
+  <main class="flex-1">
