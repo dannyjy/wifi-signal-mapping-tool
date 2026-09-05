@@ -4,13 +4,12 @@ const url = require('url');
 require('dotenv').config();
 
 function parseMysqlUrl(connectionUrl) {
-  const parsed = url.parse(connectionUrl);
-  const auth = parsed.auth ? parsed.auth.split(':') : [];
+  const parsed = new URL(connectionUrl);
   return {
     host: parsed.hostname || '127.0.0.1',
     port: parsed.port ? parseInt(parsed.port, 10) : 3306,
-    user: decodeURIComponent(auth[0] || 'root'),
-    password: auth.length > 1 ? decodeURIComponent(auth.slice(1).join(':')) : '',
+    user: decodeURIComponent(parsed.username || 'root'),
+    password: decodeURIComponent(parsed.password || ''),
     database: parsed.pathname ? decodeURIComponent(parsed.pathname.replace(/^\//, '')) : 'wifi_mapping_db'
   };
 }
@@ -32,7 +31,6 @@ if (useMysql) {
         database: process.env.DB_NAME || 'wifi_mapping_db'
       };
 
-  // TiDB Cloud and other cloud MySQL providers require SSL
   const isCloud = connection.host && (
     connection.host.includes('tidbcloud.com') ||
     connection.host.includes('rds.amazonaws.com') ||
@@ -50,6 +48,14 @@ if (useMysql) {
     pool: { min: 2, max: 10 }
   };
 } else {
+  let betterSqlite3;
+  try {
+    betterSqlite3 = require('better-sqlite3');
+  } catch (e) {
+    console.error('better-sqlite3 not available. Set DB_CLIENT=mysql or MYSQL_URL for production.');
+    process.exit(1);
+  }
+
   const dbDir = path.join(__dirname, '..', 'database');
   if (!fs.existsSync(dbDir)) {
     fs.mkdirSync(dbDir, { recursive: true });
@@ -58,9 +64,7 @@ if (useMysql) {
 
   knexConfig = {
     client: 'better-sqlite3',
-    connection: {
-      filename: dbPath
-    },
+    connection: { filename: dbPath },
     useNullAsDefault: true,
     pool: {
       afterCreate: (conn, cb) => {
@@ -72,5 +76,4 @@ if (useMysql) {
 }
 
 const db = require('knex')(knexConfig);
-
 module.exports = db;
