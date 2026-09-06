@@ -17,7 +17,7 @@ const userController = require('./controllers/userController');
 
 const { ensureAuthenticated, forwardAuthenticated } = require('./middleware/authMiddleware');
 const { checkRole } = require('./middleware/roleMiddleware');
-const upload = require('./middleware/uploadMiddleware');
+const { upload, uploadToCloudinary } = require('./middleware/uploadMiddleware');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -131,7 +131,7 @@ app.get('/buildings', ensureAuthenticated, buildingController.index);
 app.get('/buildings/create', ensureAuthenticated, checkRole(['Admin', 'Surveyor']), buildingController.create);
 app.post('/buildings', ensureAuthenticated, checkRole(['Admin', 'Surveyor']), buildingController.store);
 app.get('/buildings/:id', ensureAuthenticated, buildingController.show);
-app.post('/buildings/:id/floors', ensureAuthenticated, checkRole(['Admin', 'Surveyor']), upload.single('floor_image'), buildingController.addFloor);
+app.post('/buildings/:id/floors', ensureAuthenticated, checkRole(['Admin', 'Surveyor']), upload.single('floor_image'), uploadToCloudinary, buildingController.addFloor);
 app.post('/buildings/:id/delete', ensureAuthenticated, checkRole(['Admin']), buildingController.delete);
 app.post('/floors/:id', ensureAuthenticated, checkRole(['Admin']), buildingController.deleteFloor);
 app.delete('/floors/:id', ensureAuthenticated, checkRole(['Admin']), buildingController.deleteFloor);
